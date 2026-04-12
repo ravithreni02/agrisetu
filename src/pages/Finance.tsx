@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Banknote, ShieldCheck } from "lucide-react";
+import { Banknote, ShieldCheck, IndianRupee, Clock } from "lucide-react";
 
 const Finance = () => {
   const { toast } = useToast();
@@ -17,33 +17,33 @@ const Finance = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-lg">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center">
-              <Banknote className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-2xl">Farm Loan</CardTitle>
-              <CardDescription>Quick loans for agricultural needs</CardDescription>
-            </div>
+    <div className="container mx-auto py-8 px-4 max-w-lg pb-24 md:pb-8">
+      <Card className="rounded-2xl border-border/50 shadow-sm">
+        <CardHeader className="pb-4">
+          <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
+            <Banknote className="h-6 w-6 text-primary" />
           </div>
+          <CardTitle className="text-2xl">Farm Loan</CardTitle>
+          <CardDescription>Quick loans for agricultural needs</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="amount">Loan Amount (₹)</Label>
-              <Input id="amount" type="number" placeholder="e.g. 50000" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
+              <Label htmlFor="amount" className="flex items-center gap-2 text-sm font-medium">
+                <IndianRupee className="h-4 w-4 text-muted-foreground" /> Loan Amount (₹)
+              </Label>
+              <Input id="amount" type="number" placeholder="e.g. 50000" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required className="rounded-xl h-12 bg-muted/50 border-border/50" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">Duration (months)</Label>
-              <Input id="duration" type="number" placeholder="e.g. 12" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} required />
+              <Label htmlFor="duration" className="flex items-center gap-2 text-sm font-medium">
+                <Clock className="h-4 w-4 text-muted-foreground" /> Duration (months)
+              </Label>
+              <Input id="duration" type="number" placeholder="e.g. 12" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} required className="rounded-xl h-12 bg-muted/50 border-border/50" />
             </div>
-            <Button type="submit" size="lg" className="w-full">Apply for Loan</Button>
+            <Button type="submit" size="lg" className="w-full rounded-2xl text-base font-semibold">Apply for Loan</Button>
           </form>
-          <div className="mt-6 flex items-center gap-2 text-muted-foreground text-sm">
-            <ShieldCheck className="h-4 w-4" />
+          <div className="mt-6 flex items-center gap-2 text-muted-foreground text-sm bg-muted/50 rounded-xl p-3">
+            <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
             <span>Your information is secure and confidential.</span>
           </div>
         </CardContent>
