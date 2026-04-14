@@ -5,15 +5,43 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Banknote, ShieldCheck, IndianRupee, Clock } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Finance = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ amount: "", duration: "" });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: "Loan Application Submitted!", description: `Amount: ₹${form.amount}, Duration: ${form.duration} months.` });
-    setForm({ amount: "", duration: "" });
+    if (!user) {
+      toast({ title: "Please login", variant: "destructive" });
+      navigate("/auth");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.from("finance_requests").insert({
+      user_id: user.id,
+      amount: Number(form.amount),
+      duration: Number(form.duration),
+    });
+    setLoading(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Loan Application Submitted!", description: `Amount: ₹${form.amount}, Duration: ${form.duration} months.` });
+      setForm({ amount: "", duration: "" });
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        title: "Loan Applied",
+        message: `Your loan application for ₹${form.amount} (${form.duration} months) has been submitted.`,
+        type: "finance",
+      });
+    }
   };
 
   return (
@@ -40,7 +68,9 @@ const Finance = () => {
               </Label>
               <Input id="duration" type="number" placeholder="e.g. 12" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} required className="rounded-xl h-12 bg-muted/50 border-border/50" />
             </div>
-            <Button type="submit" size="lg" className="w-full rounded-2xl text-base font-semibold">Apply for Loan</Button>
+            <Button type="submit" size="lg" className="w-full rounded-2xl text-base font-semibold" disabled={loading}>
+              {loading ? "Submitting..." : "Apply for Loan"}
+            </Button>
           </form>
           <div className="mt-6 flex items-center gap-2 text-muted-foreground text-sm bg-muted/50 rounded-xl p-3">
             <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
