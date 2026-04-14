@@ -6,10 +6,23 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Tractor, ImagePlus, IndianRupee, Tag } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const AddEquipment = () => {
   const { toast } = useToast();
+  const { user, role } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", price: "", availability: true, image: "" });
+
+  if (!user || role !== "machinery_provider") {
+    return (
+      <div className="container mx-auto py-16 px-4 text-center">
+        <p className="text-muted-foreground mb-4">Only machinery providers can add equipment.</p>
+        <Button className="rounded-2xl" onClick={() => navigate("/")}>Go Home</Button>
+      </div>
+    );
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
