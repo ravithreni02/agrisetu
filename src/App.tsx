@@ -8,6 +8,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Chatbot from "@/components/Chatbot";
 import VoiceCommand from "@/components/VoiceCommand";
+import Footer from "@/components/Footer";
 import Home from "./pages/Home";
 import EquipmentMarketplace from "./pages/EquipmentMarketplace";
 import LaborMarketplace from "./pages/LaborMarketplace";
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <Footer />
             <Chatbot />
             <VoiceCommand />
           </AuthProvider>

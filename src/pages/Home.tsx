@@ -44,7 +44,7 @@ const Home = () => {
                   {t("rentEquipment")}
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 rounded-2xl px-8 text-base font-semibold" asChild>
+              <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-2xl px-8 text-base font-semibold border-2 border-primary-foreground/20 shadow-lg" asChild>
                 <Link to="/labor">
                   <Users className="h-5 w-5 mr-2" />
                   {t("hireLabor")}
