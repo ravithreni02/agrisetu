@@ -50,13 +50,13 @@ const Auth = () => {
             role: selectedRole,
           });
           toast({ title: "Account created!", description: "Welcome to AgriSetu." });
-          navigate("/");
+          navigate("/dashboard");
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast({ title: "Welcome back!" });
-        navigate("/");
+        navigate("/dashboard");
       }
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
