@@ -18,6 +18,8 @@ import GroupLabor from "./pages/GroupLabor";
 import Finance from "./pages/Finance";
 import Community from "./pages/Community";
 import Dashboard from "./pages/Dashboard";
+import DashboardBookings from "./pages/DashboardBookings";
+import DashboardNotifications from "./pages/DashboardNotifications";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -43,6 +45,13 @@ const App = () => (
               <Route path="/finance" element={<Finance />} />
               <Route path="/community" element={<Community />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/bookings" element={<DashboardBookings />} />
+              <Route path="/dashboard/notifications" element={<DashboardNotifications />} />
+              <Route path="/dashboard/availability" element={<Dashboard />} />
+              <Route path="/dashboard/equipment" element={<Dashboard />} />
+              <Route path="/dashboard/browse" element={<Dashboard />} />
+              <Route path="/dashboard/group" element={<Dashboard />} />
+              <Route path="/dashboard/requests" element={<Dashboard />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
