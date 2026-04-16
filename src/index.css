@@ -65,3 +65,12 @@
     @apply bg-card/80 backdrop-blur-sm border border-border/50 shadow-lg shadow-primary/5;
   }
 }
+
+/* Smooth transitions globally */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
