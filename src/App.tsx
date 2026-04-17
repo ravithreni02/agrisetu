@@ -21,6 +21,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardBookings from "./pages/DashboardBookings";
 import DashboardNotifications from "./pages/DashboardNotifications";
 import Auth from "./pages/Auth";
+import SelectRole from "./pages/SelectRole";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import RoleRoute from "@/components/RoleRoute";
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/dashboard/group" element={<RoleRoute allow={["group_leader"]}><Dashboard /></RoleRoute>} />
               <Route path="/dashboard/requests" element={<RoleRoute allow={["finance_provider"]}><Dashboard /></RoleRoute>} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/select-role" element={<SelectRole />} />
               <Route path="/profile" element={<RoleRoute><Profile /></RoleRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
