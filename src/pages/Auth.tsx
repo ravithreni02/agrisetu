@@ -7,18 +7,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Sprout, Mail, Lock, User, Phone } from "lucide-react";
+import { Sprout, Mail, Lock, User, Phone, MapPin } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
-const roles: { value: AppRole; label: string; emoji: string }[] = [
-  { value: "customer", label: "Customer (Farmer)", emoji: "🌾" },
-  { value: "machinery_provider", label: "Machinery Provider", emoji: "🚜" },
-  { value: "labor", label: "Labor", emoji: "👷" },
-  { value: "group_leader", label: "Group Labor Leader", emoji: "👥" },
-  { value: "finance_provider", label: "Finance Provider", emoji: "🏦" },
+const roles: { value: AppRole; label: string; emoji: string; desc: string }[] = [
+  { value: "customer", label: "Customer (Farmer)", emoji: "🌾", desc: "Rent equipment, hire labor" },
+  { value: "machinery_provider", label: "Equipment Owner", emoji: "🚜", desc: "List & rent out machinery" },
+  { value: "labor", label: "Labor", emoji: "👷", desc: "Offer your skills, get bookings" },
+  { value: "group_leader", label: "Group Labor Leader", emoji: "👥", desc: "Manage a group of workers" },
+  { value: "finance_provider", label: "Finance Provider", emoji: "🏦", desc: "Offer loans to farmers" },
 ];
+
+const roleRedirect = (role: AppRole | null | undefined) => {
+  // All roles land on /dashboard which renders the right view internally
+  return "/dashboard";
+};
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -27,11 +32,29 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
   const [selectedRole, setSelectedRole] = useState<AppRole>("customer");
   const [loading, setLoading] = useState(false);
 
+  const validate = (): string | null => {
+    if (!email.trim()) return "Email is required";
+    if (!/^\S+@\S+\.\S+$/.test(email)) return "Enter a valid email";
+    if (!password || password.length < 6) return "Password must be at least 6 characters";
+    if (mode === "register") {
+      if (!displayName.trim()) return "Name is required";
+      if (phone && !/^\+?[0-9\s\-()]{7,15}$/.test(phone)) return "Enter a valid phone number";
+    }
+    return null;
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    const err = validate();
+    if (err) {
+      toast({ title: "Check your details", description: err, variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "register") {
@@ -39,27 +62,40 @@ const Auth = () => {
           email,
           password,
           options: {
-            data: { display_name: displayName },
-            emailRedirectTo: window.location.origin,
+            data: {
+              display_name: displayName,
+              phone,
+              location,
+              role: selectedRole,
+            },
+            emailRedirectTo: `${window.location.origin}/dashboard`,
           },
         });
         if (error) throw error;
+        // role is also persisted by the DB trigger from raw_user_meta_data.role
+        // but we attempt the client insert as a fast-path (idempotent due to unique index)
         if (data.user) {
-          await supabase.from("user_roles").insert({
-            user_id: data.user.id,
-            role: selectedRole,
-          });
-          toast({ title: "Account created!", description: "Welcome to AgriSetu." });
-          navigate("/dashboard");
+          await supabase
+            .from("user_roles")
+            .insert({ user_id: data.user.id, role: selectedRole })
+            .then(() => null, () => null); // ignore unique-violation
         }
+        toast({ title: "Account created!", description: "Welcome to AgriSetu 🌱" });
+        navigate(roleRedirect(selectedRole), { replace: true });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast({ title: "Welcome back!" });
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      const msg =
+        err?.message?.includes("Invalid login")
+          ? "Wrong email or password"
+          : err?.message?.includes("already registered")
+            ? "This email is already registered. Try signing in."
+            : err?.message || "Something went wrong";
+      toast({ title: "Authentication error", description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -67,10 +103,10 @@ const Auth = () => {
 
   const handleGoogleLogin = async () => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: `${window.location.origin}/dashboard`,
     });
     const error = result?.error;
-    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
   };
 
   return (
@@ -90,12 +126,26 @@ const Auth = () => {
         <CardContent>
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {mode === "register" && (
-              <div className="space-y-2">
-                <Label htmlFor="name" className="flex items-center gap-2 text-sm font-medium">
-                  <User className="h-4 w-4 text-muted-foreground" /> Full Name
-                </Label>
-                <Input id="name" placeholder="Your name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required className="rounded-xl h-12 bg-muted/50 border-border/50" />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="flex items-center gap-2 text-sm font-medium">
+                    <User className="h-4 w-4 text-muted-foreground" /> Full Name
+                  </Label>
+                  <Input id="name" placeholder="Your name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required className="rounded-xl h-12 bg-muted/50 border-border/50" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="flex items-center gap-2 text-sm font-medium">
+                    <Phone className="h-4 w-4 text-muted-foreground" /> Phone (optional)
+                  </Label>
+                  <Input id="phone" type="tel" placeholder="+91 98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl h-12 bg-muted/50 border-border/50" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="location" className="flex items-center gap-2 text-sm font-medium">
+                    <MapPin className="h-4 w-4 text-muted-foreground" /> Location (optional)
+                  </Label>
+                  <Input id="location" placeholder="Village, District" value={location} onChange={(e) => setLocation(e.target.value)} className="rounded-xl h-12 bg-muted/50 border-border/50" />
+                </div>
+              </>
             )}
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-2 text-sm font-medium">
@@ -126,7 +176,10 @@ const Auth = () => {
                       }`}
                     >
                       <span className="text-lg">{r.emoji}</span>
-                      {r.label}
+                      <span className="flex-1">
+                        <span className="block">{r.label}</span>
+                        <span className="block text-xs opacity-70 font-normal">{r.desc}</span>
+                      </span>
                     </button>
                   ))}
                 </div>
