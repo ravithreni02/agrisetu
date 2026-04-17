@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Sprout, Mail, Lock, User, Phone, MapPin } from "lucide-react";
@@ -20,11 +21,6 @@ const roles: { value: AppRole; label: string; emoji: string; desc: string }[] = 
   { value: "finance_provider", label: "Finance Provider", emoji: "🏦", desc: "Offer loans to farmers" },
 ];
 
-const roleRedirect = (role: AppRole | null | undefined) => {
-  // All roles land on /dashboard which renders the right view internally
-  return "/dashboard";
-};
-
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -34,8 +30,13 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
-  const [selectedRole, setSelectedRole] = useState<AppRole>("customer");
+  // Customer is auto-granted server-side; default extra selection is empty.
+  const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const toggleRole = (r: AppRole) => {
+    setSelectedRoles((prev) => prev.includes(r) ? prev.filter((x) => x !== r) : [...prev, r]);
+  };
 
   const validate = (): string | null => {
     if (!email.trim()) return "Email is required";
@@ -58,6 +59,8 @@ const Auth = () => {
     setLoading(true);
     try {
       if (mode === "register") {
+        // Always include customer; merge with extra selections.
+        const allRoles: AppRole[] = Array.from(new Set<AppRole>(["customer", ...selectedRoles]));
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -66,27 +69,21 @@ const Auth = () => {
               display_name: displayName,
               phone,
               location,
-              role: selectedRole,
+              roles: allRoles,
             },
-            emailRedirectTo: `${window.location.origin}/dashboard`,
+            emailRedirectTo: `${window.location.origin}/select-role`,
           },
         });
         if (error) throw error;
-        // role is also persisted by the DB trigger from raw_user_meta_data.role
-        // but we attempt the client insert as a fast-path (idempotent due to unique index)
-        if (data.user) {
-          await supabase
-            .from("user_roles")
-            .insert({ user_id: data.user.id, role: selectedRole })
-            .then(() => null, () => null); // ignore unique-violation
-        }
         toast({ title: "Account created!", description: "Welcome to AgriSetu 🌱" });
-        navigate(roleRedirect(selectedRole), { replace: true });
+        // After signup, send to role selector (it auto-redirects if only 1 role)
+        navigate("/select-role", { replace: true });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast({ title: "Welcome back!" });
-        navigate("/dashboard", { replace: true });
+        // After login, role selector decides where to go
+        navigate("/select-role", { replace: true });
       }
     } catch (err: any) {
       const msg =
@@ -103,7 +100,7 @@ const Auth = () => {
 
   const handleGoogleLogin = async () => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/dashboard`,
+      redirect_uri: `${window.location.origin}/select-role`,
     });
     const error = result?.error;
     if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
@@ -162,26 +159,30 @@ const Auth = () => {
 
             {mode === "register" && (
               <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium">Select Your Role</Label>
+                <Label className="flex items-center gap-2 text-sm font-medium">
+                  Add extra roles <span className="text-xs font-normal text-muted-foreground">(Customer included by default)</span>
+                </Label>
                 <div className="grid grid-cols-1 gap-2">
-                  {roles.map((r) => (
-                    <button
-                      key={r.value}
-                      type="button"
-                      onClick={() => setSelectedRole(r.value)}
-                      className={`flex items-center gap-3 p-3 rounded-xl border text-left text-sm font-medium transition-all ${
-                        selectedRole === r.value
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border/50 bg-muted/30 text-muted-foreground hover:bg-muted/50"
-                      }`}
-                    >
-                      <span className="text-lg">{r.emoji}</span>
-                      <span className="flex-1">
-                        <span className="block">{r.label}</span>
-                        <span className="block text-xs opacity-70 font-normal">{r.desc}</span>
-                      </span>
-                    </button>
-                  ))}
+                  {roles.filter((r) => r.value !== "customer").map((r) => {
+                    const checked = selectedRoles.includes(r.value);
+                    return (
+                      <label
+                        key={r.value}
+                        className={`flex items-center gap-3 p-3 rounded-xl border text-left text-sm font-medium cursor-pointer transition-all ${
+                          checked
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border/50 bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                        }`}
+                      >
+                        <Checkbox checked={checked} onCheckedChange={() => toggleRole(r.value)} />
+                        <span className="text-lg">{r.emoji}</span>
+                        <span className="flex-1">
+                          <span className="block">{r.label}</span>
+                          <span className="block text-xs opacity-70 font-normal">{r.desc}</span>
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             )}

@@ -21,9 +21,9 @@ const RoleRoute = ({
   redirectUnauth = "/auth",
   redirectWrongRole = "/dashboard",
 }: RoleRouteProps) => {
-  const { user, role, loading } = useAuth();
+  const { user, role, roles, ready } = useAuth();
 
-  if (loading) {
+  if (!ready) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] text-muted-foreground">
         Loading...
@@ -32,6 +32,9 @@ const RoleRoute = ({
   }
 
   if (!user) return <Navigate to={redirectUnauth} replace />;
+
+  // Logged in but no active role chosen yet → force role selection
+  if (!role && roles.length > 1) return <Navigate to="/select-role" replace />;
 
   if (allow && allow.length > 0 && (!role || !allow.includes(role))) {
     return <Navigate to={redirectWrongRole} replace />;

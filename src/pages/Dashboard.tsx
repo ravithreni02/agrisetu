@@ -10,15 +10,15 @@ import GroupLeaderDashboard from "./dashboard/GroupLeaderDashboard";
 import FinanceProviderDashboard from "./dashboard/FinanceProviderDashboard";
 
 const Dashboard = () => {
-  const { user, role, loading } = useAuth();
+  const { user, role, roles, ready } = useAuth();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
-    }
-  }, [user, loading, navigate]);
+    if (!ready) return;
+    if (!user) { navigate("/auth", { replace: true }); return; }
+    if (!role && roles.length > 1) { navigate("/select-role", { replace: true }); return; }
+  }, [user, role, roles, ready, navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -38,11 +38,11 @@ const Dashboard = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  if (loading) {
+  if (!ready) {
     return <div className="flex items-center justify-center min-h-screen text-muted-foreground">Loading...</div>;
   }
 
-  if (!user) return null;
+  if (!user || (!role && roles.length > 1)) return null;
 
   const renderDashboard = () => {
     switch (role) {

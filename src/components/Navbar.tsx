@@ -39,8 +39,9 @@ const Navbar = () => {
     { to: "/finance", icon: Banknote, label: t("finance") },
   ];
 
+  // Filter extra links by ACTIVE role only — strict role isolation
   const extraLinks = [
-    { to: "/group-labor", icon: UsersRound, label: t("groupLabor") },
+    ...(role === "customer" ? [{ to: "/group-labor", icon: UsersRound, label: t("groupLabor") }] : []),
     ...(role === "machinery_provider" ? [{ to: "/add-equipment", icon: Plus, label: t("addEquipment") }] : []),
     ...(role === "labor" || role === "group_leader" ? [{ to: "/add-labor", icon: Plus, label: t("addLabor") }] : []),
     ...(user ? [{ to: "/dashboard", icon: Bell, label: t("dashboard") }] : []),
