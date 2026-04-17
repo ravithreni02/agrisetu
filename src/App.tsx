@@ -23,6 +23,7 @@ import DashboardNotifications from "./pages/DashboardNotifications";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import RoleRoute from "@/components/RoleRoute";
 
 const queryClient = new QueryClient();
 
@@ -39,21 +40,21 @@ const App = () => (
               <Route path="/" element={<Home />} />
               <Route path="/equipment" element={<EquipmentMarketplace />} />
               <Route path="/labor" element={<LaborMarketplace />} />
-              <Route path="/add-equipment" element={<AddEquipment />} />
-              <Route path="/add-labor" element={<AddLabor />} />
+              <Route path="/add-equipment" element={<RoleRoute allow={["machinery_provider"]}><AddEquipment /></RoleRoute>} />
+              <Route path="/add-labor" element={<RoleRoute allow={["labor", "group_leader"]}><AddLabor /></RoleRoute>} />
               <Route path="/group-labor" element={<GroupLabor />} />
               <Route path="/finance" element={<Finance />} />
               <Route path="/community" element={<Community />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dashboard/bookings" element={<DashboardBookings />} />
-              <Route path="/dashboard/notifications" element={<DashboardNotifications />} />
-              <Route path="/dashboard/availability" element={<Dashboard />} />
-              <Route path="/dashboard/equipment" element={<Dashboard />} />
-              <Route path="/dashboard/browse" element={<Dashboard />} />
-              <Route path="/dashboard/group" element={<Dashboard />} />
-              <Route path="/dashboard/requests" element={<Dashboard />} />
+              <Route path="/dashboard" element={<RoleRoute><Dashboard /></RoleRoute>} />
+              <Route path="/dashboard/bookings" element={<RoleRoute><DashboardBookings /></RoleRoute>} />
+              <Route path="/dashboard/notifications" element={<RoleRoute><DashboardNotifications /></RoleRoute>} />
+              <Route path="/dashboard/availability" element={<RoleRoute allow={["labor", "group_leader", "machinery_provider"]}><Dashboard /></RoleRoute>} />
+              <Route path="/dashboard/equipment" element={<RoleRoute allow={["machinery_provider"]}><Dashboard /></RoleRoute>} />
+              <Route path="/dashboard/browse" element={<RoleRoute allow={["customer"]}><Dashboard /></RoleRoute>} />
+              <Route path="/dashboard/group" element={<RoleRoute allow={["group_leader"]}><Dashboard /></RoleRoute>} />
+              <Route path="/dashboard/requests" element={<RoleRoute allow={["finance_provider"]}><Dashboard /></RoleRoute>} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile" element={<RoleRoute><Profile /></RoleRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Footer />
