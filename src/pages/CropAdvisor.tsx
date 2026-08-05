@@ -11,8 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { STATES, districtsOf, recommend, soilProfile, type AdvisorResult } from "@/lib/agrigenie";
 
 const CROP_EMOJI: Record<string, string> = {
-  rice: "🌾", maize: "🌽", chickpea: "🫘", kidneybeans: "🫘", pigeonpeas: "🫛", mothbeans: "🫘",
-  mungbean: "🫛", blackgram: "🫘", lentil: "🫘", pomegranate: "🍎", banana: "🍌", mango: "🥭",
+  rice: "🌾", maize: "🌽", chickpea: "🌱", kidneybeans: "🌱", pigeonpeas: "🌱", mothbeans: "🌱",
+  mungbean: "🌱", blackgram: "🌱", lentil: "🌱", pomegranate: "🍎", banana: "🍌", mango: "🥭",
   grapes: "🍇", watermelon: "🍉", muskmelon: "🍈", apple: "🍏", orange: "🍊", papaya: "🍐",
   coconut: "🥥", cotton: "🧵", jute: "🪢", coffee: "☕",
 };
@@ -117,7 +117,7 @@ const CropAdvisor = () => {
             <CardContent className="grid grid-cols-2 gap-3">
               {(["N", "P", "K", "ph"] as const).map((k) => (
                 <div key={k} className="space-y-1.5">
-                  <Label className="text-xs uppercase text-muted-foreground">{k === "ph" ? "pH" : k}</Label>
+                  <Label className="text-xs text-muted-foreground">{k === "ph" ? "pH" : k}</Label>
                   <Input
                     inputMode="decimal"
                     placeholder={String(defaults[k])}
