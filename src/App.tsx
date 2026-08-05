@@ -16,6 +16,7 @@ import AddEquipment from "./pages/AddEquipment";
 import AddLabor from "./pages/AddLabor";
 import GroupLabor from "./pages/GroupLabor";
 import Finance from "./pages/Finance";
+import CropAdvisor from "./pages/CropAdvisor";
 import Community from "./pages/Community";
 import Dashboard from "./pages/Dashboard";
 import DashboardBookings from "./pages/DashboardBookings";
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/add-labor" element={<RoleRoute allow={["labor", "group_leader"]}><AddLabor /></RoleRoute>} />
               <Route path="/group-labor" element={<GroupLabor />} />
               <Route path="/finance" element={<Finance />} />
+              <Route path="/crop-advisor" element={<CropAdvisor />} />
               <Route path="/community" element={<Community />} />
               <Route path="/dashboard" element={<RoleRoute><Dashboard /></RoleRoute>} />
               <Route path="/dashboard/bookings" element={<RoleRoute><DashboardBookings /></RoleRoute>} />

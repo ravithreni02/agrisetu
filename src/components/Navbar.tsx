@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Tractor, Users, MessageCircle, User, Sprout, Menu, X, Banknote, UsersRound, Plus, Bell, LogIn } from "lucide-react";
+import { Home, Tractor, Users, MessageCircle, User, Sprout, Menu, X, Banknote, UsersRound, Plus, Bell, LogIn, Leaf } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -35,6 +35,7 @@ const Navbar = () => {
     { to: "/", icon: Home, label: t("home") },
     { to: "/equipment", icon: Tractor, label: t("equipment") },
     { to: "/labor", icon: Users, label: t("labor") },
+    { to: "/crop-advisor", icon: Leaf, label: "AgriGenie" },
     { to: "/community", icon: MessageCircle, label: t("community") },
     { to: "/finance", icon: Banknote, label: t("finance") },
   ];
