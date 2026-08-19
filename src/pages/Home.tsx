@@ -8,12 +8,14 @@ const Home = () => {
   const { t } = useLanguage();
 
   const features = [
-    { to: "/equipment", icon: Tractor, label: t("equipment"), desc: "Rent farm machines easily", color: "bg-primary/10 text-primary" },
-    { to: "/labor", icon: Users, label: t("labor"), desc: "Skilled farm workers", color: "bg-accent text-accent-foreground" },
+    { to: "/crop-advisor", icon: Leaf, label: "AgriGenie", desc: "AI crop advisor", color: "bg-primary/10 text-primary" },
+    { to: "/equipment", icon: Tractor, label: t("equipment"), desc: "Rent farm machines easily", color: "bg-accent text-accent-foreground" },
+    { to: "/labor", icon: Users, label: t("labor"), desc: "Skilled farm workers", color: "bg-secondary text-secondary-foreground" },
+    { to: "/community", icon: MessageCircle, label: t("community"), desc: "Connect with farmers", color: "bg-primary/10 text-primary" },
+    { to: "/finance", icon: Banknote, label: t("finance"), desc: "Quick farm finance", color: "bg-accent text-accent-foreground" },
     { to: "/group-labor", icon: UsersRound, label: t("groupLabor"), desc: "Hire worker groups", color: "bg-secondary text-secondary-foreground" },
-    { to: "/finance", icon: Banknote, label: t("finance"), desc: "Quick farm finance", color: "bg-primary/10 text-primary" },
-    { to: "/community", icon: MessageCircle, label: t("community"), desc: "Connect with farmers", color: "bg-accent text-accent-foreground" },
   ];
+
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
