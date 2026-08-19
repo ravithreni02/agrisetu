@@ -220,7 +220,7 @@ export async function recommend(input: AdvisorInput): Promise<AdvisorResult> {
 
     return {
       crop,
-      confidence: Math.round(confidence * 100) / 100,
+      confidence: Math.round(confidence * 10000) / 10000,
       yieldTHa: Math.round(estYield * 100) / 100,
       waterMm: b.water,
       irrigationMm: Math.round(irrigation * 10) / 10,

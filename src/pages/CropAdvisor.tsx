@@ -231,7 +231,7 @@ const CropAdvisor = () => {
                         </div>
                         <div>
                           <h3 className="text-lg font-bold leading-tight">{title(r.crop)}</h3>
-                          <p className="text-xs text-muted-foreground">Match {r.confidence}% · driver: {r.driver}</p>
+                          <p className="text-xs text-muted-foreground">Match {r.confidence >= 0.01 ? r.confidence.toFixed(2) : "<0.01"}% · driver: {r.driver}</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
