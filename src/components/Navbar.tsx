@@ -33,12 +33,13 @@ const Navbar = () => {
 
   const mainLinks = [
     { to: "/", icon: Home, label: t("home") },
+    { to: "/crop-advisor", icon: Leaf, label: "AgriGenie" },
     { to: "/equipment", icon: Tractor, label: t("equipment") },
     { to: "/labor", icon: Users, label: t("labor") },
-    { to: "/crop-advisor", icon: Leaf, label: "AgriGenie" },
     { to: "/community", icon: MessageCircle, label: t("community") },
     { to: "/finance", icon: Banknote, label: t("finance") },
   ];
+
 
   // Filter extra links by ACTIVE role only — strict role isolation
   const extraLinks = [

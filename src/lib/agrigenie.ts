@@ -166,8 +166,11 @@ export async function recommend(input: AdvisorInput): Promise<AdvisorResult> {
   const rawTop = ranked[0].crop;
   const rawTopConf = Math.round(ranked[0].confidence * 100) / 100;
 
-  let cands = ranked.filter((r) => r.confidence >= 5).slice(0, 10);
-  if (cands.length === 0) cands = ranked.slice(0, 3);
+  // Gaussian NB is very peaked: a hard probability cut-off leaves a single crop.
+  // Keep a proper shortlist so the multi-objective scoring has something to rank.
+  let cands = ranked.filter((r) => r.confidence >= 0.01).slice(0, 10);
+  if (cands.length < 5) cands = ranked.slice(0, 5);
+
 
   const benchList = Object.values(data.benchmarks);
   const maxWater = Math.max(...benchList.map((b) => b.water));
@@ -195,22 +198,16 @@ export async function recommend(input: AdvisorInput): Promise<AdvisorResult> {
     const irrigation = Math.max(b.water - climate.rainfall37d, 0);
     const profit = estYield * 1000 * b.price - b.cost;
 
-    // Feature driver: largest standardised deviation from this crop's ideal profile.
+    // Feature driver: the worst-fitting feature if the crop is meaningfully off-profile,
+    // otherwise the best-fitting feature (so the narrative matches the verdict).
     const nb = data.nb[crop];
-    let driverIdx = 0;
-    let best = -Infinity;
-    let positive = true;
-    FEATURES.forEach((_, i) => {
-      const z = Math.abs(x[i] - nb.mean[i]) / Math.sqrt(nb.var[i]);
-      const impact = 1 / (1 + z);
-      const magnitude = Math.abs(impact - 0.5);
-      if (magnitude > best) {
-        best = magnitude;
-        driverIdx = i;
-        positive = z <= 1;
-      }
-    });
+    const zs = FEATURES.map((_, i) => Math.abs(x[i] - nb.mean[i]) / Math.sqrt(nb.var[i] || 1e-6));
+    const worst = zs.indexOf(Math.max(...zs));
+    const bestFit = zs.indexOf(Math.min(...zs));
+    const positive = zs[worst] <= 1.5;
+    const driverIdx = positive ? bestFit : worst;
     const driver = FEATURES[driverIdx];
+
 
     let sWater = 1 - irrigation / maxWater;
     if (climate.risk !== "low") sWater *= climate.risk === "moderate" ? 0.7 : 0.4;
@@ -223,7 +220,7 @@ export async function recommend(input: AdvisorInput): Promise<AdvisorResult> {
 
     return {
       crop,
-      confidence: Math.round(confidence * 100) / 100,
+      confidence: Math.round(confidence * 10000) / 10000,
       yieldTHa: Math.round(estYield * 100) / 100,
       waterMm: b.water,
       irrigationMm: Math.round(irrigation * 10) / 10,
