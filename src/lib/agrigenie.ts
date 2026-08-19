@@ -166,8 +166,11 @@ export async function recommend(input: AdvisorInput): Promise<AdvisorResult> {
   const rawTop = ranked[0].crop;
   const rawTopConf = Math.round(ranked[0].confidence * 100) / 100;
 
-  let cands = ranked.filter((r) => r.confidence >= 5).slice(0, 10);
-  if (cands.length === 0) cands = ranked.slice(0, 3);
+  // Gaussian NB is very peaked: a hard probability cut-off leaves a single crop.
+  // Keep a proper shortlist so the multi-objective scoring has something to rank.
+  let cands = ranked.filter((r) => r.confidence >= 0.01).slice(0, 10);
+  if (cands.length < 5) cands = ranked.slice(0, 5);
+
 
   const benchList = Object.values(data.benchmarks);
   const maxWater = Math.max(...benchList.map((b) => b.water));
