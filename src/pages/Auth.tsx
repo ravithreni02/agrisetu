@@ -119,6 +119,26 @@ const Auth = () => {
           <CardDescription>
             {mode === "login" ? "Sign in to your account" : "Create your account"}
           </CardDescription>
+          <div className="flex items-center justify-center gap-2 pt-3">
+            {([
+              { code: "en", label: "English" },
+              { code: "hi", label: "हिंदी" },
+              { code: "te", label: "తెలుగు" },
+            ] as const).map((l) => (
+              <button
+                key={l.code}
+                type="button"
+                onClick={() => setLang(l.code)}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                  lang === l.code
+                    ? "border-primary bg-primary/10 text-primary font-semibold"
+                    : "border-border/50 text-muted-foreground hover:bg-muted/50"
+                }`}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleEmailAuth} className="space-y-4">
