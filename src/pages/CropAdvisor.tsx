@@ -62,6 +62,21 @@ const CropAdvisor = () => {
     }
   };
 
+  // Auto-run when the voice assistant navigates here with a state + district
+  const runRef = useRef(run);
+  runRef.current = run;
+  const autoKey = `${params.get("auto")}:${params.get("state")}:${params.get("district")}`;
+  const autoDone = useRef("");
+  useEffect(() => {
+    if (params.get("auto") !== "1" || !params.get("state") || !params.get("district")) return;
+    if (autoDone.current === autoKey) return;
+    autoDone.current = autoKey;
+    runRef.current();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoKey]);
+
+
+
   const sliders: { key: keyof typeof w; label: string; icon: typeof TrendingUp }[] = [
     { key: "confidence", label: "Suitability", icon: Sprout },
     { key: "yield", label: "Yield", icon: TrendingUp },
