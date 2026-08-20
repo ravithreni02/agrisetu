@@ -326,6 +326,7 @@ export const loadingAdvice = (state: string, district: string, lang: Language) =
 export interface AssistantState {
   pending?: "agrigenie";
   place: Place;
+  askedDistrict?: number;
 }
 
 export interface AssistantReply {
@@ -333,6 +334,12 @@ export interface AssistantReply {
   navigate?: string;
   state: AssistantState;
 }
+
+const adviceReply = (state: string, district: string, lang: Language, prefix = ""): AssistantReply => ({
+  text: prefix + loadingAdvice(state, district, lang),
+  navigate: `/crop-advisor?state=${encodeURIComponent(state)}&district=${encodeURIComponent(district)}&auto=1`,
+  state: { place: { state, district } },
+});
 
 export function handleUtterance(
   text: string,
@@ -346,13 +353,8 @@ export function handleUtterance(
   const inAgriFlow = prev.pending === "agrigenie" || intent === "agrigenie";
 
   if (inAgriFlow) {
-    if (place.state && place.district) {
-      return {
-        text: loadingAdvice(place.state, place.district, lang),
-        navigate: `/crop-advisor?state=${encodeURIComponent(place.state)}&district=${encodeURIComponent(place.district)}&auto=1`,
-        state: { place },
-      };
-    }
+    if (place.state && place.district) return adviceReply(place.state, place.district, lang);
+
     if (!place.state) {
       return {
         text:
@@ -360,15 +362,23 @@ export function handleUtterance(
             ? say(PHRASES.openingAgriGenie, lang)
             : say(PHRASES.askState, lang),
         navigate: intent === "agrigenie" && prev.pending !== "agrigenie" ? "/crop-advisor" : undefined,
-        state: { pending: "agrigenie", place },
+        state: { pending: "agrigenie", place, askedDistrict: prev.askedDistrict },
       };
+    }
+
+    const asked = prev.askedDistrict ?? 0;
+    const available = districtsOf(place.state);
+    // The user named a district we have no soil profile for — fall back gracefully
+    if (asked >= 1 && available.length) {
+      return adviceReply(place.state, available[0], lang, say(PHRASES.districtFallback, lang) + " ");
     }
     return {
       text: say(PHRASES.askDistrict, lang),
       navigate: prev.pending !== "agrigenie" ? "/crop-advisor" : undefined,
-      state: { pending: "agrigenie", place },
+      state: { pending: "agrigenie", place, askedDistrict: asked + 1 },
     };
   }
+
 
   const map: Partial<Record<IntentName, Phrase>> = {
     equipment: PHRASES.openingEquipment,
