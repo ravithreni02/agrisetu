@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { translations, Language } from "@/i18n/translations";
 
 interface LanguageContextType {
@@ -15,7 +15,11 @@ const LanguageContext = createContext<LanguageContextType>({
 
 export const useLanguage = () => useContext(LanguageContext);
 
+const STORAGE_KEY = "agrisetu.lang";
+
 const detectLanguage = (): Language => {
+  const saved = typeof localStorage !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+  if (saved === "en" || saved === "hi" || saved === "te") return saved;
   const browserLang = navigator.language.toLowerCase();
   if (browserLang.startsWith("hi")) return "hi";
   if (browserLang.startsWith("te")) return "te";
@@ -23,7 +27,22 @@ const detectLanguage = (): Language => {
 };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [lang, setLang] = useState<Language>(detectLanguage());
+  const [lang, setLangState] = useState<Language>(detectLanguage());
+
+  const setLang = (l: Language) => {
+    setLangState(l);
+    try {
+      localStorage.setItem(STORAGE_KEY, l);
+    } catch {
+      /* storage unavailable — keep in-memory only */
+    }
+  };
+
+  // Keep the choice for the whole session across tabs/reloads
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   const t = (key: string) => translations[lang]?.[key] || translations.en[key] || key;
 
   return (

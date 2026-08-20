@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Sprout, Droplets, IndianRupee, TrendingUp, MapPin, SlidersHorizontal, CloudSun, Sparkles, Loader2, FlaskConical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,9 +22,13 @@ const title = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const CropAdvisor = () => {
   const { toast } = useToast();
-  const [state, setState] = useState(STATES[0]);
+  const [params] = useSearchParams();
+  const initialState = STATES.find((s) => s === params.get("state")) ?? STATES[0];
+  const [state, setState] = useState(initialState);
   const districts = useMemo(() => districtsOf(state), [state]);
-  const [district, setDistrict] = useState(districts[0]);
+  const [district, setDistrict] = useState(
+    districtsOf(initialState).find((d) => d === params.get("district")) ?? districtsOf(initialState)[0]
+  );
   const [soilOverride, setSoilOverride] = useState({ N: "", P: "", K: "", ph: "" });
   const [w, setW] = useState({ confidence: 0.4, yield: 0.15, water: 0.3, profit: 0.15 });
   const [loading, setLoading] = useState(false);
@@ -56,6 +61,21 @@ const CropAdvisor = () => {
       setLoading(false);
     }
   };
+
+  // Auto-run when the voice assistant navigates here with a state + district
+  const runRef = useRef(run);
+  runRef.current = run;
+  const autoKey = `${params.get("auto")}:${params.get("state")}:${params.get("district")}`;
+  const autoDone = useRef("");
+  useEffect(() => {
+    if (params.get("auto") !== "1" || !params.get("state") || !params.get("district")) return;
+    if (autoDone.current === autoKey) return;
+    autoDone.current = autoKey;
+    runRef.current();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoKey]);
+
+
 
   const sliders: { key: keyof typeof w; label: string; icon: typeof TrendingUp }[] = [
     { key: "confidence", label: "Suitability", icon: Sprout },
