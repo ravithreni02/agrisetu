@@ -24,6 +24,7 @@ const roles: { value: AppRole; label: string; emoji: string; desc: string }[] = 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { lang, setLang } = useLanguage();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
