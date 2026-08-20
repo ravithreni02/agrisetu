@@ -272,6 +272,11 @@ export const PHRASES = {
     "कौन सा जिला?",
     "ఏ జిల్లా?"
   ),
+  districtFallback: P(
+    "I don't have soil data for that district yet — using the nearest available district in the same state.",
+    "उस जिले का मिट्टी डेटा अभी नहीं है — उसी राज्य के निकटतम उपलब्ध जिले का उपयोग कर रहा हूँ।",
+    "ఆ జిల్లా నేల డేటా ఇంకా లేదు — అదే రాష్ట్రంలో అందుబాటులో ఉన్న జిల్లాను వాడుతున్నాను."
+  ),
   openingEquipment: P(
     "Opening the equipment marketplace 🚜",
     "उपकरण बाज़ार खोल रहा हूँ 🚜",
