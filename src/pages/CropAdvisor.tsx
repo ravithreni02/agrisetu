@@ -22,9 +22,13 @@ const title = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const CropAdvisor = () => {
   const { toast } = useToast();
-  const [state, setState] = useState(STATES[0]);
+  const [params] = useSearchParams();
+  const initialState = STATES.find((s) => s === params.get("state")) ?? STATES[0];
+  const [state, setState] = useState(initialState);
   const districts = useMemo(() => districtsOf(state), [state]);
-  const [district, setDistrict] = useState(districts[0]);
+  const [district, setDistrict] = useState(
+    districtsOf(initialState).find((d) => d === params.get("district")) ?? districtsOf(initialState)[0]
+  );
   const [soilOverride, setSoilOverride] = useState({ N: "", P: "", K: "", ph: "" });
   const [w, setW] = useState({ confidence: 0.4, yield: 0.15, water: 0.3, profit: 0.15 });
   const [loading, setLoading] = useState(false);
