@@ -102,10 +102,16 @@ const Auth = () => {
 
   const handleGoogleLogin = async () => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/select-role`,
+      redirect_uri: `${window.location.origin}/auth`,
     });
+    if (result?.redirected) return; // browser is navigating to Google
     const error = result?.error;
-    if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+    if (error) {
+      toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    // Session already set (popup flow) — go to role selection
+    navigate("/select-role", { replace: true });
   };
 
   return (
