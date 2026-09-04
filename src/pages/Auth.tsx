@@ -26,6 +26,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { lang, setLang } = useLanguage();
+  const { user, ready } = useAuth();
+
+  // If already signed in (e.g. returning from Google OAuth redirect), go to role selection.
+  useEffect(() => {
+    if (ready && user) navigate("/select-role", { replace: true });
+  }, [ready, user, navigate]);
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
