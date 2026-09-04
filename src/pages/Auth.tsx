@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { lang, setLang } = useLanguage();
+  const { user, ready } = useAuth();
+
+  // If already signed in (e.g. returning from Google OAuth redirect), go to role selection.
+  useEffect(() => {
+    if (ready && user) navigate("/select-role", { replace: true });
+  }, [ready, user, navigate]);
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -102,10 +109,16 @@ const Auth = () => {
 
   const handleGoogleLogin = async () => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/select-role`,
+      redirect_uri: `${window.location.origin}/auth`,
     });
+    if (result?.redirected) return; // browser is navigating to Google
     const error = result?.error;
-    if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+    if (error) {
+      toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    // Session already set (popup flow) — go to role selection
+    navigate("/select-role", { replace: true });
   };
 
   return (
